@@ -8,3 +8,8 @@ Data base project for organizing conferences
 * [Wokstym](https://github.com/Wokstym)
 * [Observer46](https://github.com/Observer46)
 
+### Private links for easy access during development
+* [Documentation](https://docs.google.com/document/d/1ymQ1T61HFZ7iJGTX26i4XoBoo-_01Jx-BAdSRkJGTy8/edit)
+* [DiagramER](https://drive.google.com/file/d/1cyNHgtphSljL-3WKLMtQqKc6J93toCIk/view)
+* [SchemeDB](https://drive.google.com/file/d/1E-VMZ3SvTYWPoCNAh4faGwPS9eFtLk3g/view)
+
