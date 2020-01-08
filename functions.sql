@@ -37,3 +37,23 @@ BEGIN
 	-- Return the result of the function
 	RETURN @FreePlaces
 END
+
+
+CREATE FUNCTION [dbo].[GetPriceStageForDate]
+(
+	@Date date,
+	@ConferenceDayId int
+)
+RETURNS money
+AS
+BEGIN
+	-- Declare the return variable here
+	DECLARE @Price money = (SELECT TOP 1 Price FROM PriceInfo
+									WHERE (ConferenceDayID = @ConferenceDayId) AND (DATEDIFF(day,InitialDate,@date) >= 0)
+									ORDER BY InitialDate DESC )
+
+	-- Return the result of the function
+	RETURN @Price
+
+END
+
