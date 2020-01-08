@@ -1,0 +1,134 @@
+CREATE VIEW [dbo].[WorkshopBookingPayingInfo]
+AS
+SELECT        WB.booking_id AS [Booking id], WB.places_reserved AS [Places booked], COUNT(WR.reservation_id) AS [Places assigned], W.price AS [Price for normal place], 
+                         W.student_discount AS [student discount], COUNT(S.participant_id) AS [Students included], CAST(W.price * ((COUNT(WR.reservation_id) - COUNT(S.participant_id)) 
+                         + COUNT(S.participant_id) * (1 - W.student_discount)) AS numeric(10, 2)) AS 'Price for reserved places', W.price * WB.places_reserved AS 'Price at the most'
+FROM            dbo.Workshop_booking AS WB INNER JOIN
+                         dbo.Workshops AS W ON WB.workshop_id = W.workshop_id INNER JOIN
+                         dbo.Conference_day AS CD ON W.conference_day_id = CD.conference_day_id INNER JOIN
+                         dbo.Conferences AS C ON CD.conference_id = C.conference_id LEFT OUTER JOIN
+                         dbo.Workshop_reservations AS WR ON WB.booking_id = WR.workshop_booking_id LEFT OUTER JOIN
+                         dbo.Conference_day_reservations AS CR ON WR.conference_day_reservation_id = CR.reservation_id LEFT OUTER JOIN
+                         dbo.Students AS S ON CR.participant_id = S.participant_id AND DATEDIFF(day, C.start_day, S.expiration_date) >= 0
+GROUP BY WB.booking_id, WB.places_reserved, W.price, W.student_discount
+
+GO
+/****** Object:  View [dbo].[ConferenceDayPayingInfo]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ConferenceDayPayingInfo]
+AS
+SELECT        CB.booking_id, C.conference_id, CB.conference_day_id, CB.client_id, CB.booking_date, CB.places_reserved AS 'Places booked', COUNT(CR.reservation_id) 
+                         AS [Places assigned], COUNT(S.participant_id) AS Students, CAST(PRI.price * ((COUNT(CR.reservation_id) - COUNT(S.participant_id)) + COUNT(S.participant_id) 
+                         * PRI.student_discount) AS numeric(10, 2)) AS 'Conference day act price', dbo.GetPriceStageForDate(CB.booking_date, CB.conference_day_id) 
+                         * CB.places_reserved AS 'Conference day max price', ISNULL(WI.act_price, 0) AS 'Workshops act price', ISNULL(WI.up_price, 0) AS 'Workshops max price'
+FROM            dbo.Conference_day_bookings AS CB INNER JOIN
+                         dbo.Conference_day AS CD ON CB.conference_day_id = CD.conference_day_id INNER JOIN
+                         dbo.Conferences AS C ON CD.conference_id = C.conference_id LEFT OUTER JOIN
+                         dbo.Conference_day_reservations AS CR ON CB.booking_id = CR.conference_day_booking_id LEFT OUTER JOIN
+                         dbo.Students AS S ON CR.participant_id = S.participant_id AND DATEDIFF(day, C.start_day, S.expiration_date) >= 0 INNER JOIN
+                         dbo.Prices_info AS PRI ON PRI.info_id = dbo.GetPriceInfoIdForDate(CB.booking_date, CB.conference_day_id) LEFT OUTER JOIN
+                             (SELECT        [Booking id] AS conference_day_booking, SUM([Price for reserved places]) AS act_price, SUM([Price at the most]) AS up_price
+                               FROM            dbo.WorkshopBookingPayingInfo
+                               GROUP BY [Booking id]) AS WI ON CB.booking_id = WI.conference_day_booking
+GROUP BY CB.booking_id, CB.conference_day_id, CB.client_id, CB.booking_date, CB.places_reserved, PRI.price, PRI.student_discount, C.conference_id, WI.act_price, 
+                         WI.up_price
+
+GO
+/****** Object:  View [dbo].[ConferencePayingInfo]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ConferencePayingInfo]
+AS
+SELECT        client_id, conference_id, CAST(SUM([Conference day act price]) + SUM([Workshops act price]) AS numeric(10, 2)) AS 'Act price to pay for conference', 
+                         CAST(SUM([Conference day max price]) + SUM([Workshops max price]) AS numeric(10, 2)) AS 'Max price to pay for conference'
+FROM            dbo.ConferenceDayPayingInfo
+GROUP BY client_id, conference_id
+
+GO
+/****** Object:  View [dbo].[PaymentsDiffInfo]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[PaymentsDiffInfo]
+AS
+SELECT        P.booking_id AS [Conference day booking id], CAST(SUM(P.amount) AS numeric(10, 2)) AS [Paid money], 
+                         CAST(CB.[Conference day act price] + CB.[Workshops act price] AS numeric(10, 2)) AS 'Act price to pay for booking', 
+                         CAST(CB.[Conference day max price] + CB.[Workshops max price] AS numeric(10, 2)) AS 'Max price to pay for booking'
+FROM            dbo.Payments AS P INNER JOIN
+                         dbo.ConferenceDayPayingInfo AS CB ON P.booking_id = CB.booking_id
+GROUP BY CB.[Conference day act price] + CB.[Workshops act price], CB.[Conference day max price] + CB.[Workshops max price], P.booking_id
+
+GO
+/****** Object:  View [dbo].[ClientsToCall]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ClientsToCall]
+AS
+SELECT        CI.booking_id, CI.booking_date, C.conference_id, C.start_day, CI.[Places booked], CI.[Places assigned], ISNULL(PAI.[Paid money], 0) AS 'Paid money', CI.client_id, 
+                         CL.name AS 'Client name', CL.phone AS 'Client phone', CL.email AS 'Client email', CL.is_company AS 'Is company'
+FROM            dbo.ConferenceDayPayingInfo AS CI LEFT OUTER JOIN
+                         dbo.PaymentsDiffInfo AS PAI ON CI.booking_id = PAI.[Conference day booking id] AND 
+                         PAI.[Paid money] > CI.[Conference day act price] + CI.[Workshops act price] INNER JOIN
+                         dbo.Conference_day_bookings AS CB ON CI.booking_id = CB.booking_id AND CB.cancelled = 0 INNER JOIN
+                         dbo.Conference_day AS CD ON CI.conference_day_id = CD.conference_day_id INNER JOIN
+                         dbo.Conferences AS C ON CD.conference_id = C.conference_id INNER JOIN
+                         dbo.Clients AS CL ON CI.client_id = CL.client_id
+WHERE        (DATEDIFF(day, GETDATE(), C.start_day) <= 14) AND (DATEDIFF(day, GETDATE(), C.start_day) >= 0)
+
+GO
+
+/****** Object:  View [dbo].[ClientsThatDidntFullfilledTheirBooking]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ClientsThatDidntFullfilledTheirBooking]
+AS
+SELECT        dbo.Clients.client_id, dbo.Clients.name, dbo.Clients.phone, dbo.Clients.email, dbo.Clients.is_company AS [Is company], 
+                         dbo.Conference_day_bookings.places_reserved AS [Places reserved], dbo.Conference_day_bookings.booking_date AS [Booking date],
+                             (SELECT        COUNT(reservation_id) AS Expr1
+                               FROM            dbo.Conference_day_reservations
+                               WHERE        (dbo.Conference_day_bookings.booking_id = conference_day_booking_id)) AS [Places assigned]
+FROM            dbo.Clients INNER JOIN
+                         dbo.Conference_day_bookings ON dbo.Clients.client_id = dbo.Conference_day_bookings.client_id
+
+GO
+/****** Object:  View [dbo].[ImportantClients]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ImportantClients]
+AS
+SELECT        dbo.Clients.client_id, dbo.Clients.name, dbo.Clients.phone, dbo.Clients.email, dbo.Clients.is_company, SUM(dbo.Conference_day_bookings.places_reserved) 
+                         AS [Total places reserved], SUM(dbo.Payments.amount) AS [Total Payments], COUNT(DISTINCT dbo.Conference_day.conference_id) 
+                         AS [Conferences participated]
+FROM            dbo.Clients INNER JOIN
+                         dbo.Conference_day_bookings ON dbo.Clients.client_id = dbo.Conference_day_bookings.client_id INNER JOIN
+                         dbo.Payments ON dbo.Conference_day_bookings.booking_id = dbo.Payments.booking_id INNER JOIN
+                         dbo.Conference_day ON dbo.Conference_day_bookings.conference_day_id = dbo.Conference_day.conference_day_id
+GROUP BY dbo.Clients.client_id, dbo.Clients.name, dbo.Clients.phone, dbo.Clients.email, dbo.Clients.is_company
+
+GO
+
+/****** Object:  View [dbo].[ParticipantsForWorkshops]    Script Date: 2014-01-31 10:42:24 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ParticipantsForWorkshops]
+AS
+SELECT        P.participant_id, P.firstname, P.lastname, WB.workshop_id
+FROM            dbo.Workshop_reservations AS WR INNER JOIN
+                         dbo.Conference_day_reservations AS CR ON WR.conference_day_reservation_id = CR.reservation_id INNER JOIN
+                         dbo.Participants AS P ON CR.participant_id = P.participant_id INNER JOIN
+                         dbo.Workshop_booking AS WB ON WR.workshop_booking_id = WB.booking_id
+
