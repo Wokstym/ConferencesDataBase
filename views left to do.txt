@@ -1,18 +1,3 @@
-CREATE VIEW [dbo].[WorkshopBookingPayingInfo]
-AS
-SELECT        WB.booking_id AS [Booking id], WB.places_reserved AS [Places booked], COUNT(WR.reservation_id) AS [Places assigned], W.price AS [Price for normal place], 
-                         W.student_discount AS [student discount], COUNT(S.participant_id) AS [Students included], CAST(W.price * ((COUNT(WR.reservation_id) - COUNT(S.participant_id)) 
-                         + COUNT(S.participant_id) * (1 - W.student_discount)) AS numeric(10, 2)) AS 'Price for reserved places', W.price * WB.places_reserved AS 'Price at the most'
-FROM            dbo.Workshop_booking AS WB INNER JOIN
-                         dbo.Workshops AS W ON WB.workshop_id = W.workshop_id INNER JOIN
-                         dbo.Conference_day AS CD ON W.conference_day_id = CD.conference_day_id INNER JOIN
-                         dbo.Conferences AS C ON CD.conference_id = C.conference_id LEFT OUTER JOIN
-                         dbo.Workshop_reservations AS WR ON WB.booking_id = WR.workshop_booking_id LEFT OUTER JOIN
-                         dbo.Conference_day_reservations AS CR ON WR.conference_day_reservation_id = CR.reservation_id LEFT OUTER JOIN
-                         dbo.Students AS S ON CR.participant_id = S.participant_id AND DATEDIFF(day, C.start_day, S.expiration_date) >= 0
-GROUP BY WB.booking_id, WB.places_reserved, W.price, W.student_discount
-
-GO
 /****** Object:  View [dbo].[ConferenceDayPayingInfo]    Script Date: 2014-01-31 10:42:24 ******/
 SET ANSI_NULLS ON
 GO
@@ -82,23 +67,6 @@ FROM            dbo.ConferenceDayPayingInfo AS CI LEFT OUTER JOIN
                          dbo.Conferences AS C ON CD.conference_id = C.conference_id INNER JOIN
                          dbo.Clients AS CL ON CI.client_id = CL.client_id
 WHERE        (DATEDIFF(day, GETDATE(), C.start_day) <= 14) AND (DATEDIFF(day, GETDATE(), C.start_day) >= 0)
-
-GO
-
-/****** Object:  View [dbo].[ClientsThatDidntFullfilledTheirBooking]    Script Date: 2014-01-31 10:42:24 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ClientsThatDidntFullfilledTheirBooking]
-AS
-SELECT        dbo.Clients.client_id, dbo.Clients.name, dbo.Clients.phone, dbo.Clients.email, dbo.Clients.is_company AS [Is company], 
-                         dbo.Conference_day_bookings.places_reserved AS [Places reserved], dbo.Conference_day_bookings.booking_date AS [Booking date],
-                             (SELECT        COUNT(reservation_id) AS Expr1
-                               FROM            dbo.Conference_day_reservations
-                               WHERE        (dbo.Conference_day_bookings.booking_id = conference_day_booking_id)) AS [Places assigned]
-FROM            dbo.Clients INNER JOIN
-                         dbo.Conference_day_bookings ON dbo.Clients.client_id = dbo.Conference_day_bookings.client_id
 
 GO
 /****** Object:  View [dbo].[ImportantClients]    Script Date: 2014-01-31 10:42:24 ******/

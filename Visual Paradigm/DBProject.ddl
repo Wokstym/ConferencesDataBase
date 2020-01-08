@@ -87,7 +87,7 @@ CREATE TABLE ConferenceDayBooking (
   ConferenceDayBookingID int IDENTITY NOT NULL, 
   PlacesReservedAmount   int NOT NULL CHECK(PlacesReservedAmount > 0), 
   BookingDate            date NOT NULL, 
-  isCancelled            bit DEFAULT '0' NOT NULL, 
+  IsCancelled            bit DEFAULT '0' NOT NULL, 
   CustomerID             int NOT NULL, 
   ConferenceDayID        int NOT NULL, 
   PRIMARY KEY CLUSTERED (ConferenceDayBookingID));
@@ -155,6 +155,44 @@ CREATE TABLE WorkshopReservations (
   WorkshopBookingID          int NOT NULL, 
   ConferenceDayReservationID int NOT NULL, 
   PRIMARY KEY CLUSTERED (WorkshopReservationID));
+GO
+CREATE VIEW ClientsWhoMustFullfilBookings AS
+SELECT
+	Customers.CustomerID,
+	Customers.FirstName,
+	Customers.Phone,
+	Customers.LastName,
+	Customers.Email,
+	ConferenceDayBooking.PlacesReservedAmount AS [Places reserved],
+	ConferenceDayBooking.BookingDate AS [Booking date],
+	(SELECT COUNT (ConferenceDayReservationID) AS
+	FROM ConferenceDayReservations
+	WHERE ConferenceDayBooking.ConferenceDayBookingID = 	ConferenceDayReservations.ConferenceDayBookingID
+	) AS [Places assigned]
+FROM
+	Customers INNER JOIN
+	ConferenceDayBooking ON Customers.CustomerID = ConferenceDayBooking.CustomerID;
+GO
+CREATE VIEW WorkshopBookingPayingInfo AS
+SELECT
+	WorkshopBooking.WorkshopBookingID,
+	WorkshopBooking.PlacesReservedAmount,
+	count(WorkshopReservations.WorkshopReservationID) as 'Places assigned',
+	Workshops.Price as 'Regular price for place',
+	count(Students.ParticipantID) as 'Students amount',
+	(cast((Workshop.Price * ((count(WorkshopReservations.WorkshopReservationID)) as numeric(10,2))) as 'Price for reserved places',
+	(Workshop.Price * WorkshopBooking.PlacesReservedAmount) as 'Expected payment for booking'
+	
+FROM
+	WorkshopBooking INNER JOIN
+	Workshops ON WorkshopBooking.WorkshopID = Workshops.WorkshopID LEFT JOIN
+	ConferenceDayReservations ON WorkshopBooking.ConferenceDayBookingID = ConferenceDayReservations.ConferenceDayBookingID LEFT JOIN
+	WorkshopReservations ON WorkshopBooking.WorkshopBookingID = WorkshopReservations.WorkshopBookingID INNER JOIN
+	ConferenceDays ON Workshops.ConferenceDayID = ConferenceDays.ConferenceDayID LEFT JOIN
+	Students ON( (ConferenceDayReservations.ParticipantID = Students.ParticipantID) AND (DATEDIFF(day,Conferences.StartDate,Students.ExpirationDate)>=0 )) INNER JOIN
+	Conferences ON ConferenceDays.ConferenceID = Conferences.ConferenceID
+GROUP BY WorkshopBooking.WorkshopBookingID, WorkshopBooking.PlacesResevervedAmount, Workshop.Price;
+GO
 ALTER TABLE Conferences ADD CONSTRAINT FKConference324472 FOREIGN KEY (OrganizerID) REFERENCES Organizers (OrganizerID);
 ALTER TABLE Buildings ADD CONSTRAINT FKBuildings784537 FOREIGN KEY (BuildingOwnerID) REFERENCES BuildingOwners (BuildingOwnerID);
 ALTER TABLE Conferences ADD CONSTRAINT FKConference475199 FOREIGN KEY (BuildingID) REFERENCES Buildings (BuildingID);
