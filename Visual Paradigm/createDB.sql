@@ -89,7 +89,7 @@ CREATE TABLE ConferenceDayBooking (
   ConferenceDayBookingID int IDENTITY NOT NULL, 
   PlacesReservedAmount   int NOT NULL CHECK(PlacesReservedAmount > 0), 
   BookingDate            date NOT NULL, 
-  isCancelled            bit DEFAULT '0' NOT NULL, 
+  IsCancelled            bit DEFAULT '0' NOT NULL, 
   CustomerID             int NOT NULL, 
   ConferenceDayID        int NOT NULL, 
   PRIMARY KEY CLUSTERED (ConferenceDayBookingID));

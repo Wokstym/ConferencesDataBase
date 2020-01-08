@@ -1,4 +1,4 @@
-CREATE FUNCTION [dbo].[GetNumberOfFreePlacesForWorkshop]
+CREATE FUNCTION GetNumberOfFreePlacesForWorkshop
 (
 	@WorkshopId int
 )
@@ -39,7 +39,7 @@ BEGIN
 END
 
 
-CREATE FUNCTION [dbo].[GetPriceStageForDate]
+CREATE FUNCTION GetPriceStageForDate
 (
 	@Date date,
 	@ConferenceDayId int
@@ -55,5 +55,69 @@ BEGIN
 	-- Return the result of the function
 	RETURN @Price
 
+END
+
+
+CREATE FUNCTION GetNumberOfFreePlacesForConference
+(
+	@ConferenceDayId int
+)
+RETURNS int
+AS
+BEGIN
+	IF not exists (SELECT ConferenceDays.ConferenceDayId
+					FROM ConferenceDays
+					WHERE ConferenceDays.ConferenceDayId = @ConferenceDayId)
+	BEGIN
+		RETURN 0
+	END
+	ELSE
+	BEGIN
+		DECLARE @FreePlacesAmount int
+		DECLARE curs CURSOR LOCAL FOR
+			SELECT PlacesReservedAmount
+			FROM ConferenceDayBooking
+			WHERE ConferenceDayId = @ConferenceDayId
+		DECLARE @PlacesReserved int
+
+		-- All slots for that day
+		SET @FreePlacesAmount = (SELECT ParticipantLimit
+								FROM ConferenceDays
+								WHERE ConferenceDays.ConferenceDayId = @ConferenceDayId)
+		
+
+		-- Reserved for that day
+		SET @PlacesReserved = (SELECT sum(PlacesReservedAmount)
+								FROM ConferenceDayBooking
+								WHERE ConferenceDayId = @ConferenceDayId AND IsCancelled = 0 
+								GROUP BY ConferenceDayId)
+
+		--Free = All - reserved
+		IF (@PlacesReserved is not null)
+			SET @FreePlacesAmount -=@PlacesReserved
+
+
+	END
+	RETURN @FreePlacesAmount
+END
+
+
+
+
+
+CREATE FUNCTION GetPriceInfoForDate
+(
+	@Date date 
+	@ConferenceDayId int
+)
+RETURNS money
+AS
+BEGIN
+	DECLARE @PriceInfo money
+	SET @PriceInfo = (SELECT TOP 1 Price 
+						FROM PriceInfo
+						WHERE ConferenceDayId = @ConferenceDayId AND (DATEDIFF(day,InitialDate,@date) >=0) 
+						ORDER BY InitialDate DESC)
+	RETURNS @PriceInfo
 END
 
