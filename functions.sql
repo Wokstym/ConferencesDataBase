@@ -1,3 +1,4 @@
+GO
 CREATE FUNCTION GetNumberOfFreePlacesForWorkshop
 (
 	@WorkshopId int
@@ -38,7 +39,7 @@ BEGIN
 	RETURN @FreePlaces
 END
 
-
+GO
 CREATE FUNCTION GetPriceStageForDate
 (
 	@Date date,
@@ -57,7 +58,7 @@ BEGIN
 
 END
 
-
+GO
 CREATE FUNCTION GetNumberOfFreePlacesForConference
 (
 	@ConferenceDayId int
@@ -104,10 +105,10 @@ END
 
 
 
-
+GO
 CREATE FUNCTION GetPriceInfoForDate
 (
-	@Date date 
+	@Date date, 
 	@ConferenceDayId int
 )
 RETURNS money
@@ -118,6 +119,22 @@ BEGIN
 						FROM PriceInfo
 						WHERE ConferenceDayId = @ConferenceDayId AND (DATEDIFF(day,InitialDate,@date) >=0) 
 						ORDER BY InitialDate DESC)
-	RETURNS @PriceInfo
+	RETURN @PriceInfo
 END
 
+GO
+CREATE FUNCTION IsCompany
+(
+	@CustomerID int
+)
+RETURNS bit
+AS
+BEGIN
+	DECLARE @IsCompany bit
+	SET @IsCompany = (
+		SELECT Count(CompanyID)
+		FROM Companies
+		WHERE CustomerID = @CustomerID
+	)
+	RETURN IsCompany
+END
