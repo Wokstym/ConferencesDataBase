@@ -33,7 +33,7 @@ AS
   SELECT P.FirstName, P.LastName, P.ParticipantID, CB.ConferenceDayID, CB.CustomerID
   FROM dbo.ConferenceDayReservations AS CR
     INNER JOIN dbo.Participants
-    AS P ON CR.ParticipantsID = P.ParticipantsID
+    AS P ON CR.ParticipantID = P.ParticipantID
     INNER JOIN dbo.ConferenceDayBooking
     AS CB ON CR.ConferenceDayBookingID = CB.ConferenceDayBookingID
 
@@ -85,35 +85,37 @@ AS
   GROUP BY WorkshopBooking.WorkshopBookingID, WorkshopBooking.PlacesReservedAmount, Workshop.Price;
 
 /* Author: Grzegorz Poręba */
+
 GO
 CREATE VIEW [dbo].[ClientsToCall]
 AS
-SELECT CI.booking_id,
-       CI.booking_date,
-       C.conference_id,
-       C.start_day,
-       CI.[Places booked],
-       CI.[Places assigned],
-       ISNULL(PAI.[Paid money], 0) AS 'Paid money',
-       CI.client_id,
-       CL.name                     AS 'Client name',
-       CL.phone                    AS 'Client phone',
-       CL.email                    AS 'Client email',
-       CL.is_company               AS 'Is company'
+SELECT CI.ConferenceDayBookingID,
+       CI.BookingDate,
+       C.ConferenceID,
+       C.StartDate,
+       CI.BookedPlaces,
+       CI.PlacesAssigned,
+       ISNULL(PAI.PaidMoney, 0)  AS 'Paid money',
+       CI.CustomerID,
+       CL.FirstName                 AS 'Client name',
+       CL.LastName                  AS 'Client surname',
+       CL.phone                     AS 'Client phone',
+       CL.email                     AS 'Client email',
+       dbo.IsCompany(CL.CustomerID) AS 'Is company'
 FROM dbo.ConferenceDayPayingInfo AS CI
          LEFT OUTER JOIN
-     dbo.PaymentsDiffInfo AS PAI ON CI.ConferenceDayBookingID = PAI.[Conference day booking id] AND
-                                    PAI.[Paid money] > CI.[Conference day act price] + CI.[Workshops act price]
+     dbo.PaymentsDiffInfo AS PAI ON CI.ConferenceDayBookingID = PAI.ConferenceDayBookingID AND
+                                    PAI.PaidMoney > CI.ConferenceDayActualPrice + CI.WorkshopActualPrice
          INNER JOIN
      dbo.ConferenceDayBooking AS CB ON CI.ConferenceDayBookingID = CB.ConferenceDayBookingID AND CB.isCancelled = 0
          INNER JOIN
-     dbo.ConferenceDay AS CD ON CI.ConferenceDayID = CD.ConferenceDayID
+     dbo.ConferenceDays AS CD ON CI.ConferenceDayID = CD.ConferenceDayID
          INNER JOIN
      dbo.Conferences AS C ON CD.ConferenceID = C.ConferenceID
          INNER JOIN
      dbo.Customers AS CL ON CI.CustomerID = CL.CustomerID
-WHERE (DATEDIFF(day, GETDATE(), C.StartDay) <= 14)
-  AND (DATEDIFF(day, GETDATE(), C.StartDay) >= 0)
+WHERE (DATEDIFF(day, GETDATE(), C.StartDate) <= 14)
+  AND (DATEDIFF(day, GETDATE(), C.StartDate) >= 0)
 
 /* Author: Grzegorz Poręba */
 GO
@@ -146,7 +148,7 @@ AS
 SELECT P.ParticipantID, P.FirstName, P.LastName, WB.WorkshopBookingID
 FROM dbo.WorkshopReservations AS WR
          INNER JOIN
-     dbo.ConferenceDayReservations AS CR ON WR.ConferenceDayReservationsID = CR.ConferenceDayReservationsID
+     dbo.ConferenceDayReservations AS CR ON WR.ConferenceDayReservationID = CR.ConferenceDayReservationID
          INNER JOIN
      dbo.Participants AS P ON CR.ParticipantID = P.ParticipantID
          INNER JOIN
