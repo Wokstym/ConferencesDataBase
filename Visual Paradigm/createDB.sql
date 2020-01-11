@@ -22,7 +22,7 @@ CREATE TABLE Organizers (
 CREATE TABLE BuildingOwners (
   BuildingOwnerID int IDENTITY NOT NULL, 
   CompanyName     varchar(50) NOT NULL UNIQUE, 
-  PhoneNumber     varchar(50) NOT NULL, 
+  Phone           varchar(50) NOT NULL, 
   Address         varchar(50) NOT NULL, 
   Country         varchar(50) NOT NULL, 
   City            varchar(50) NOT NULL, 
@@ -58,7 +58,7 @@ CREATE TABLE Rooms (
 CREATE TABLE Workshops (
   WorkshopID       int IDENTITY NOT NULL, 
   WorkshopName     varchar(50) NOT NULL, 
-  Price            varchar(50) NOT NULL CHECK(Price >= 0), 
+  Price            money NOT NULL CHECK(Price >= 0), 
   StartTime        time NOT NULL, 
   EndTime          time NOT NULL, 
   ParticipantLimit int NOT NULL CHECK(ParticipantLimit > 0), 
@@ -106,7 +106,7 @@ CREATE TABLE Customers (
   PRIMARY KEY CLUSTERED (CustomerID));
 CREATE TABLE Companies (
   CustomerID  int NOT NULL, 
-  CompanyID   int NOT NULL, 
+  CompanyID   int IDENTITY NOT NULL, 
   CompanyName varchar(50) NOT NULL UNIQUE, 
   NIP         varchar(50) NOT NULL, 
   PRIMARY KEY CLUSTERED (CustomerID, 
