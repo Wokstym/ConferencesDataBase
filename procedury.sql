@@ -49,7 +49,7 @@ CREATE PROCEDURE AddConferenceDay
 	@DayNumber int,
 	@ParticipantLimit int,
 	@Date date,
-	@ConferenceID int,
+	@ConferenceID int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -79,7 +79,7 @@ CREATE PROCEDURE AddEmployee
 	@LastName varchar(50),
 	@Address varchar(50),
 	@City varchar(50),
-	@Phone varchar(50),
+	@Phone varchar(50)
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -117,7 +117,7 @@ GO
 CREATE PROCEDURE AddStudentData
 	@ParticipantID int,
 	@CardID int,
-	@ExpirationDate date,
+	@ExpirationDate date
 
 AS
 BEGIN
@@ -216,9 +216,10 @@ CREATE PROCEDURE AssignParticipantToConferenceDayBooking
 AS
 BEGIN
 	SET NOCOUNT ON;
-		INSERT INTO ConferenceDayReseverations(ReservationDate,ConferenceDayBookingID, ParticipantID)
+		INSERT INTO ConferenceDayReservations(ReservationDate,ConferenceDayBookingID, ParticipantID)
 			VALUES(GETDATE(), @ConferenceDayBookingID, @ParticipantID)
 END
+
 
 GO
 CREATE PROCEDURE AssignEmployeeToConferenceDay
@@ -227,17 +228,17 @@ CREATE PROCEDURE AssignEmployeeToConferenceDay
 AS
 BEGIN
 	SET NOCOUNT ON;
-	DECLARE @ConfrenceDayDate = (SELECT ConferenceDays.Date
+	DECLARE @ConfrenceDayDate date = (SELECT ConferenceDays.Date
 								FROM ConferenceDays
 								WHERE ConferenceDayID = @ConferenceDayID)
-	DECLARE @ConferencesAssignedForNumber = (SELECT COUNT (ConferenceDayID)
-											FROM EmployeesForConferenceDays
-											INNER JOIN ConferenceDays CD ON ConferenceDayID = @ConferenceDayID
-											WHERE (EmployeeID = @EmployeeID) AND (CD.Date = @ConferenceDayDate))
+	DECLARE @ConferencesAssignedForNumber int = (SELECT COUNT (EFCD.ConferenceDayID)
+											FROM EmployeesForConferenceDays as EFCD
+											INNER JOIN ConferenceDays CD ON EFCD.ConferenceDayID = CD.ConferenceDayID
+											WHERE (EmployeeID = @EmployeeID) AND (CD.Date = @ConfrenceDayDate))
 
 	IF (@ConferencesAssignedForNumber > 0)
 	BEGIN
-		THROW 52000,'Employee already assigned for other conference during that day'
+		; THROW 52000,'Employee already assigned for other conference during that day'
 	END
 	ELSE
 	BEGIN
@@ -253,8 +254,8 @@ CREATE PROCEDURE AssignPartnerToConference
 AS
 BEGIN
 	SET NOCOUNT ON;
-	INSERT INTO PartnersForConferences(PartnerID,ConfernceID)
-		VALUES(@PartnerID, @ConfernceID)
+	INSERT INTO PartnersForConferences(PartnerID,ConferenceID)
+		VALUES(@PartnerID, @ConferenceID)
 END
 
 GO
@@ -265,11 +266,11 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @ConfDayBookingID int = (SELECT ConferenceDayBookingID
-														FROM WorkshopBookingID
+														FROM WorkshopBooking
 														WHERE WorkshopBookingID = @WorkshopBookingID)
 
-	DECLARE @ParticipantsConferenceDayReservationID int = (SELECT ConferenceDayReseverationID
-														FROM ConferenceDayReseverations
+	DECLARE @ParticipantsConferenceDayReservationID int = (SELECT ConferenceDayReservationID
+														FROM ConferenceDayReservations
 														WHERE (ParticipantID = @ParticipantID) AND (ConferenceDayBookingID = @ConfDayBookingID))
 
 	IF (@ParticipantsConferenceDayReservationID is null)
@@ -277,7 +278,7 @@ BEGIN
 		; THROW 52000, 'Participant not assigned for appropriate conferenece day booking.', 1
 	END
 
-	INSERT INTO WorkshopReservations(ReservationDate,WorkshopBookingID, ConferenceDayReseverationID)
+	INSERT INTO WorkshopReservations(ReservationDate,WorkshopBookingID, ConferenceDayReservationID)
 		VALUES(GETDATE(),@WorkshopBookingID, @ParticipantsConferenceDayReservationID)
 END
 
@@ -316,21 +317,21 @@ BEGIN
 	IF NOT EXISTS(SELECT * FROM ConferenceDayBooking
 					WHERE ConferenceDayBookingID = @ConferenceDayBookingID)
 	BEGIN
-		THROW 51000, 'Cannot find such booking for conference day',1
+		; THROW 51000, 'Cannot find such booking for conference day',1
 	END
 	ELSE IF ((SELECT IsCancelled
 				FROM ConferenceDayBooking
 				WHERE ConferenceDayBookingID = @ConferenceDayBookingID) = 1)
 	BEGIN
-		THROW 52000, 'Booking for conference day has already been cancelled',1
+		; THROW 52000, 'Booking for conference day has already been cancelled',1
 	END
 	ELSE
 	BEGIN
-		DECLARE @WorkshopBookingID
-		DECLARE curs CURSOR LOCAL FOR 	(SELECT WorkshopBooking.WorkshopBookingID
+		DECLARE @WorkshopBookingID int
+		DECLARE curs CURSOR LOCAL FOR 	SELECT WorkshopBooking.WorkshopBookingID
 										FROM WorkshopBooking
 										WHERE WorkshopBooking.ConferenceDayBookingID =
-										@ConferenceDayBookingID)
+										@ConferenceDayBookingID
 		OPEN curs
 		BEGIN TRY
 			BEGIN TRAN -- Deleting all workshop booking
@@ -348,7 +349,7 @@ BEGIN
 
 					FETCH NEXT FROM curs INTO @WorkshopBookingID
 				END
-				DELETE FROM ConferenceDayReseverations
+				DELETE FROM ConferenceDayReservations
 					WHERE ConferenceDayBookingID = @ConferenceDayBookingID
 
 				UPDATE ConferenceDayBooking
@@ -386,7 +387,7 @@ BEGIN
 									INNER JOIN ConferenceDayBooking as CDB
 										ON (CDPI.ConferenceDayBookingID = CDB.ConferenceDayBookingID)
 										AND
-										((CD.IsCancelled = 0))
+										((CDB.IsCancelled = 0))
 									)
 	DECLARE @BookingID int, @BookingDate date
 	OPEN curs
@@ -407,13 +408,13 @@ END
 
 GO
 CREATE PROCEDURE CancelWorkshopBooking
-	@WorkshopBookingID int,
+	@WorkshopBookingID int
 AS
 BEGIN
 	SET NOCOUNT ON;
 	IF ((SELECT IsCancelled FROM WorkshopBooking WHERE WorkshopBookingID = @WorkshopBookingID)=1)
 	BEGIN
-		;THROW 52000, 'Booking already cancelled',1
+		; THROW 52000, 'Booking already cancelled',1
 	END
 	ELSE
 	BEGIN TRY
@@ -439,7 +440,7 @@ CREATE PROCEDURE ChangePlacesReservedAmountForWorkshopBooking
 AS
 BEGIN
 	SET NOCOUNT ON;
-		UPDATE WorkshopsBooking
+		UPDATE WorkshopBooking
 			SET PlacesReservedAmount = @NewPlacesReservedAmount
 			WHERE WorkshopBookingID = @WorkshopBookingID
 END
@@ -476,7 +477,7 @@ BEGIN
 	BEGIN TRY
 		BEGIN TRAN
 			DELETE FROM WorkshopReservations
-				WHERE ConferenceDayReseverationID = @ConferenceDayReseverationID
+				WHERE ConferenceDayReservationID = @ConferenceDayReseverationID
 		COMMIT TRAN
 	END TRY
 
@@ -516,7 +517,7 @@ BEGIN
 								FROM ConferenceDays 
 								WHERE ConferenceDayID = @ConferenceDayID))
 	BEGIN
-		THROW 52000, 'You can only increase participant limit for conferenece day',1
+		; THROW 52000, 'You can only increase participant limit for conferenece day',1
 	END
 	ELSE
 		UPDATE ConferenceDays
@@ -535,7 +536,7 @@ BEGIN
 								FROM Workshops 
 								WHERE WorkshopID = @WorkshopID))
 	BEGIN
-		THROW 52000, 'You can only increase participant limit for workshop',1
+		; THROW 52000, 'You can only increase participant limit for workshop',1
 	END
 	ELSE
 		UPDATE Workshops

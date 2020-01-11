@@ -114,12 +114,12 @@ CREATE FUNCTION GetPriceInfoForDate
 RETURNS money
 AS
 BEGIN
-	DECLARE @PriceInfo money
-	SET @PriceInfo = (SELECT TOP 1 Price 
+	DECLARE @PriceInfoID int
+	SET @PriceInfoID = (SELECT TOP 1 PriceInfoID 
 						FROM PriceInfo
 						WHERE ConferenceDayId = @ConferenceDayId AND (DATEDIFF(day,InitialDate,@date) >=0) 
 						ORDER BY InitialDate DESC)
-	RETURN @PriceInfo
+	RETURN @PriceInfoID
 END
 
 GO
