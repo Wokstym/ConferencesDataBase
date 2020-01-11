@@ -197,15 +197,14 @@ BEGIN
 END
 
 GO
-CREATE PROCEDURE AddPayment
+CREATE PROCEDURE AddPayment 
 	@Amount money,
-	@PaymentDate date,
 	@ConferenceDayBookingID int
 AS
 BEGIN
 	SET NOCOUNT ON;
 		INSERT INTO Payments(Amount, PaymentDate, ConferenceDayBookingID)
-			VALUES(@Amount, @PaymentDate, @ConferenceDayBookingID)
+			VALUES(@Amount, GETDATE(), @ConferenceDayBookingID)
 END
 
 GO
@@ -248,12 +247,14 @@ BEGIN
 END
 
 GO
-CREATE PROCEDURE AssignPartnerToConference
+CREATE PROCEDURE AssignPartnerToConference -- Do sprawdzenia 
 	@PartnerID int,
 	@ConferenceID int
 AS
 BEGIN
 	SET NOCOUNT ON;
+
+
 	INSERT INTO PartnersForConferences(PartnerID,ConferenceID)
 		VALUES(@PartnerID, @ConferenceID)
 END
@@ -544,5 +545,79 @@ BEGIN
 			WHERE WorkshopID = @WorkshopID
 END
 
--- Procedures for generator 
--- SOON
+
+GO
+CREATE PROCEDURE GEN_AddPayment
+	@Amount money,
+	@ConferenceDayBookingID int,
+	@Date date
+AS
+BEGIN
+	SET NOCOUNT ON;
+		INSERT INTO Payments(Amount, PaymentDate, ConferenceDayBookingID)
+			VALUES(@Amount, @Date, @ConferenceDayBookingID)
+END
+
+GO
+CREATE PROCEDURE GEN_AssignParticipantToConferenceDayBooking
+	@ConferenceDayBookingID int,
+	@ParticipantID int,
+	@Date date
+AS
+BEGIN
+	SET NOCOUNT ON;
+		INSERT INTO ConferenceDayReservations(ReservationDate,ConferenceDayBookingID, ParticipantID)
+			VALUES(@Date, @ConferenceDayBookingID, @ParticipantID)
+END
+
+GO
+CREATE PROCEDURE GEN_AssignParticipantToWorkshopBooking
+	@WorkshopBookingID int,
+	@ParticipantID int,
+	@Date date
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @ConfDayBookingID int = (SELECT ConferenceDayBookingID
+														FROM WorkshopBooking
+														WHERE WorkshopBookingID = @WorkshopBookingID)
+
+	DECLARE @ParticipantsConferenceDayReservationID int = (SELECT ConferenceDayReservationID
+														FROM ConferenceDayReservations
+														WHERE (ParticipantID = @ParticipantID) AND (ConferenceDayBookingID = @ConfDayBookingID))
+
+	IF (@ParticipantsConferenceDayReservationID is null)
+	BEGIN
+		; THROW 52000, 'Participant not assigned for appropriate conferenece day booking.', 1
+	END
+
+	INSERT INTO WorkshopReservations(ReservationDate,WorkshopBookingID, ConferenceDayReservationID)
+		VALUES(@Date, @WorkshopBookingID, @ParticipantsConferenceDayReservationID)
+END
+
+GO
+CREATE PROCEDURE GEN_BookPlacesForConferenceDay
+	@CustomerID int,
+	@ConferenceDayID int,
+	@PlacesReservedAmount int,
+	@Date date
+AS
+BEGIN
+	SET NOCOUNT ON;
+	INSERT INTO ConferenceDayBooking(PlacesReservedAmount, BookingDate, CustomerID, ConferenceDayID)
+		VALUES(@PlacesReservedAmount, @Date, @CustomerID, @ConferenceDayID)
+END
+
+GO
+CREATE PROCEDURE GEN_BookPlacesForWorkshop -- Może wymaga przerobienia
+	@WorkshopID int,
+	@PlacesReservedAmount int, 
+	@ConferenceDayBookingID int,
+	@Date date
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	INSERT INTO WorkshopBooking(PlacesReservedAmount, BookingDate, WorkshopID, ConferenceDayBookingID)
+		VALUES(@PlacesReservedAmount, @Date, @WorkshopID, @ConferenceDayBookingID)
+END
