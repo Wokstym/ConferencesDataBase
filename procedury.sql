@@ -11,8 +11,8 @@ CREATE PROCEDURE AddCustomer
 AS
 BEGIN
 	SET NOCOUNT ON;
-		INSERT INTO Customers(FirstName,LastName,Email,Address, PostalCode, City, Country)
-			VALUES (@FirstName, @LastName, @Email, @Address, @PostalCode, @City, @Country)
+		INSERT INTO Customers(FirstName,LastName,Email,Address, PostalCode, City, Country, Phone)
+			VALUES (@FirstName, @LastName, @Email, @Address, @PostalCode, @City, @Country, @Phone)
 END
 
 GO
