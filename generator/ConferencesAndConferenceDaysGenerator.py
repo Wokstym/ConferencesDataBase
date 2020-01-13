@@ -95,8 +95,9 @@ ConferenceTypes = ["Scientific", "Business", "Multilingual", "Media", "Entertain
 
 def main():
     f = open("ConferencesAndConferenceDaysGeneratedExec.sql", "w")
+    f.write("ALTER TABLE Conferences DISABLE TRIGGER ForbidToSpecifyConferencesFromThePast\n")
     for x in range(70):
-        conference_id = x
+        conference_id = x+1
         conference_name = random.choice(ConferenceNames)
         day_of_month = random.randint(1, 20)
 
@@ -115,12 +116,13 @@ def main():
 
         for y in range(int(days_amount)):
             # conference_day_id = str(x + y)
-            day_number = str(y)
+            day_number = str(y+1)
             participant_limit = str(random.randint(30, 200))
-            date = start_date[:8] + str(int(start_date[-2:]) + y)
+            date = start_date[:8] + str(int(start_date[-2:]) + y).zfill(2)
             f.write(
                 "\tEXEC AddConferenceDay @DayNumber = " + day_number + ", @ParticipantLimit = " + participant_limit +
                 ", @Date = \'" + date + "\', @ConferenceID = " + str(conference_id)+"\n")
+    f.write("ALTER TABLE Conferences ENABLE TRIGGER ForbidToSpecifyConferencesFromThePast")
     f.close()
 
 

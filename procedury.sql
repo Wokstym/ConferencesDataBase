@@ -237,7 +237,7 @@ BEGIN
 
 	IF (@ConferencesAssignedForNumber > 0)
 	BEGIN
-		; THROW 52000,'Employee already assigned for other conference during that day'
+		; THROW 52000,'Employee already assigned for other conference during that day',1
 	END
 	ELSE
 	BEGIN

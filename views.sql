@@ -50,7 +50,7 @@ AS
     Customers.Email,
     ConferenceDayBooking.PlacesReservedAmount AS [Places reserved],
     ConferenceDayBooking.BookingDate AS [Booking date],
-    (SELECT COUNT (ConferenceDayReservationID) AS
+    (SELECT COUNT (ConferenceDayReservationID) 
     FROM ConferenceDayReservations
     WHERE ConferenceDayBooking.ConferenceDayBookingID =   ConferenceDayReservations.ConferenceDayBookingID
   ) AS [Places assigned]
@@ -126,7 +126,7 @@ SELECT dbo.Customers.CustomerID,
        dbo.Customers.LastName,
        dbo.Customers.Phone,
        dbo.Customers.Email,
-       IsCompany(Customers.CustomerID) AS IsCompany,
+       dbo.IsCompany(Customers.CustomerID) AS IsCompany,
        SUM(dbo.ConferenceDayBooking.PlacesReservedAmount)
                                 AS [Total places reserved],
        SUM(dbo.Payments.Amount) AS [Total Payments],
@@ -139,7 +139,7 @@ FROM dbo.Customers
      dbo.Payments ON dbo.ConferenceDayBooking.ConferenceDayBookingID = dbo.Payments.ConferenceDayBookingID
          INNER JOIN
      dbo.ConferenceDays ON dbo.ConferenceDayBooking.ConferenceDayID = dbo.ConferenceDays.ConferenceDayID
-GROUP BY dbo.Customers.CustomerID,  dbo.Customers.FirstName, dbo.Customers.LastName, dbo.Customers.Phone, dbo.Customers.Email, IsCompany
+GROUP BY dbo.Customers.CustomerID,  dbo.Customers.FirstName, dbo.Customers.LastName, dbo.Customers.Phone, dbo.Customers.Email
 
 /* Author: Grzegorz Poręba */
 GO
@@ -190,7 +190,7 @@ AS
 SELECT CustomerID, ConferenceID, cast((SUM(ConferenceDayActualPrice) + SUM(WorkshopActualPrice)) as numeric(10,2))
         as 'ActualPriceToPayForConference',
         cast((SUM(ConferenceDayMaxExpectedPrice) + SUM(WorkshopMaxExpectedPrice)) as numeric(10,2))
-        as 'MaxExpectedPriceToPayForConference',
+        as 'MaxExpectedPriceToPayForConference'
 FROM ConferenceDayPayingInfo
 GROUP BY CustomerID, ConferenceID
 

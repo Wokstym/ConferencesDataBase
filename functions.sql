@@ -136,5 +136,5 @@ BEGIN
 		FROM Companies
 		WHERE CustomerID = @CustomerID
 	)
-	RETURN IsCompany
+	RETURN @IsCompany
 END

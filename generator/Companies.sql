@@ -1,8 +1,8 @@
+SET IDENTITY_INSERT Companies ON
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (50, 1, 'Douglas Inc', '042167777');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (18, 2, 'Kiehn, Pouros and Schoen', '044640330');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (54, 3, 'Gleichner-Stanton', '966898001');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (53, 4, 'Von Inc', '378906983');
-insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (70, 5, 'Hagenes LLC', '682317414');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (38, 6, 'Wilkinson-Moore', '736813422');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (61, 8, 'Ankunding-Padberg', '205427088');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (20, 9, 'McLaughlin Inc', '879539447');
@@ -13,4 +13,4 @@ insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (45, 14, 
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (44, 15, 'Larson LLC', '223826208');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (43, 16, 'Emard-Ankunding', '819628053');
 insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (36, 17, 'Nikolaus-Predovic', '159368466');
-insert into Companies (CustomerID, CompanyID, CompanyName, NIP) values (66, 20, 'Hoppe, Funk and Fritsch', '567053883');
+SET IDENTITY_INSERT Companies OFF 

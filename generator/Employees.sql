@@ -1,3 +1,4 @@
+SET IDENTITY_INSERT Employees ON
 insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) values (1, 'Cate', 'Denzilow', '97 Sutherland Junction', 'Taiyangling', '975875869');
 insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) values (2, 'Tate', 'Alster', '63227 Hudson Avenue', 'Dallas', '915249080');
 insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) values (3, 'Hobie', 'Whellans', '46120 Morrow Court', 'Limbi', '836037955');
@@ -66,3 +67,4 @@ insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) va
 insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) values (66, 'Darbee', 'Held', '218 Springs Way', 'Neftçala', '803762384');
 insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) values (67, 'Dominick', 'Orrill', '3 Armistice Circle', 'Baume-les-Dames', '941315126');
 insert into Employees (EmployeeID, FirstName, LastName, Address, City, Phone) values (68, 'Dorene', 'Armand', '6830 Sullivan Plaza', 'Mlandizi', '862928148');
+SET IDENTITY_INSERT Employees OFF

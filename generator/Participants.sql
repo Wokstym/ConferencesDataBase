@@ -1,3 +1,4 @@
+SET IDENTITY_INSERT Participants ON
 insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) values (1, 'Morie', 'Domino', '1955-05-10', 'mdomino0@abc.net.au');
 insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) values (2, 'Teresa', 'Knevit', '1988-05-25', 'tknevit1@ehow.com');
 insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) values (3, 'Cathie', 'Smeed', '1996-04-19', 'csmeed2@ustream.tv');
@@ -998,3 +999,4 @@ insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) 
 insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) values (998, 'Ophelia', 'Faiers', '1974-01-22', 'ofaiersrp@disqus.com');
 insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) values (999, 'Elsinore', 'Walshe', '1985-07-18', 'ewalsherq@google.pl');
 insert into Participants (ParticipantID, FirstName, LastName, BirthDate, Email) values (1000, 'Cahra', 'Vogel', '1957-12-19', 'cvogelrr@dailymotion.com');
+SET IDENTITY_INSERT Participants OFF

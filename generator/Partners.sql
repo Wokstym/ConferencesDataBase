@@ -1,10 +1,12 @@
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (1, 'Toy Group', 'Cleaning', '1384269295', '32143 Stone Corner Lane', '2234', 'Gafargaon', 'Bangladesh');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (2, 'O''Kon Group', 'Cleaning', '4623840632', '7 Northridge Avenue', '4775-446', 'Nine', 'Portugal');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (3, 'Dibbert-Dooley', 'Security', '4695364269', '3994 Nancy Street', 'WF9', 'Buurhakaba', 'Somalia');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (4, 'West, Blanda and Boyle', 'Security', '3088270682', '02 Carioca Alley', '56017', 'Žiežmariai', 'Lithuania');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (5, 'West LLC', 'Cleaning', '8538069629', '233 Old Gate Lane', '10801', 'Bayan Gol', 'China');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (6, 'Beatty-Heaney', 'Tech support', '6902205664', '9 Hanover Place', '45075 CEDEX 2', 'Orléans', 'France');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (7, 'Kling LLC', 'Tech support', '7413049639', '1 Hallows Terrace', '452056', 'Phnom Penh', 'Cambodia');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (8, 'Volkman Inc', 'Cleaning', '2135041189', '2 Bonner Court', '1255', 'Maindang', 'Philippines');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (9, 'Lueilwitz Group', 'Car rental', '6196093885', '0 Coolidge Crossing', '253-0041', 'Dashtobod', 'Uzbekistan');
-insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Addres, PostalCode, City, Country) values (10, 'Schinner LLC', 'Tech support', '3715744350', '27281 Autumn Leaf Terrace', '89110-000', 'Tuanjie', 'China');
+SET IDENTITY_INSERT Partners ON
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (1, 'Toy Group', 'Cleaning', '1384269295', '32143 Stone Corner Lane', '2234', 'Gafargaon', 'Bangladesh');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (2, 'O''Kon Group', 'Cleaning', '4623840632', '7 Northridge Avenue', '4775-446', 'Nine', 'Portugal');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (3, 'Dibbert-Dooley', 'Security', '4695364269', '3994 Nancy Street', 'WF9', 'Buurhakaba', 'Somalia');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (4, 'West, Blanda and Boyle', 'Security', '3088270682', '02 Carioca Alley', '56017', 'Žiežmariai', 'Lithuania');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (5, 'West LLC', 'Cleaning', '8538069629', '233 Old Gate Lane', '10801', 'Bayan Gol', 'China');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (6, 'Beatty-Heaney', 'Tech support', '6902205664', '9 Hanover Place', '45075 CEDEX 2', 'Orléans', 'France');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (7, 'Kling LLC', 'Tech support', '7413049639', '1 Hallows Terrace', '452056', 'Phnom Penh', 'Cambodia');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (8, 'Volkman Inc', 'Cleaning', '2135041189', '2 Bonner Court', '1255', 'Maindang', 'Philippines');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (9, 'Lueilwitz Group', 'Car rental', '6196093885', '0 Coolidge Crossing', '253-0041', 'Dashtobod', 'Uzbekistan');
+insert into Partners (PartnerID, CompanyName, PartnerCategory, Phone, Address, PostalCode, City, Country) values (10, 'Schinner LLC', 'Tech support', '3715744350', '27281 Autumn Leaf Terrace', '89110-000', 'Tuanjie', 'China');
+SET IDENTITY_INSERT Partners OFF
