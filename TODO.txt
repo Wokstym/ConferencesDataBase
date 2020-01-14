@@ -1,0 +1,5 @@
+ConfernceDayBooking:
+- poprawić daty bookingu na zgodne z InitialDate w PriceInfo
+- poprawić liczbę miejsc zarezerwowanych, by nie przekraczała miejsc na dany dzień (może trigger do tego jeśli nie ma?)
+- anulować te, które nie zapłacone 
+- poprawić CustomerID aby zgadzało się z tym w Conferences (lub usunąć z Conferences ten klucz obcy)

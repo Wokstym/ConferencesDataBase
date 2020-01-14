@@ -76,6 +76,28 @@ BEGIN
         END
 END
 
+GO
+CREATE TRIGGER [dbo].[ParticipantAmountLessThanRoomCapacity]
+    ON [dbo].[Workshops]
+    AFTER INSERT, UPDATE AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+    DECLARE @ParticipantLimit int = (SELECT ParticipantLimit
+                              FROM inserted)
+    DECLARE @RoomID int = (SELECT RoomID
+                            FROM inserted)
+    DECLARE @RoomCapacity int = (SELECT RoomCapacity
+                            FROM Rooms
+                            WHERE RoomID = @RoomID)
+    IF (@RoomCapacity < @ParticipantLimit)
+        BEGIN
+            ;THROW 52000,'Cannot have more participants than it can contain people',1
+            ROLLBACK TRANSACTION
+        END
+END
+
 
 
 GO
