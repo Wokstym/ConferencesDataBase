@@ -1,5 +1,23 @@
+Workshops:
+- dodać ze 100 darmowych workshopów
+
 ConfernceDayBooking:
 - poprawić daty bookingu na zgodne z InitialDate w PriceInfo
 - poprawić liczbę miejsc zarezerwowanych, by nie przekraczała miejsc na dany dzień (może trigger do tego jeśli nie ma?)
 - anulować te, które nie zapłacone 
 - poprawić CustomerID aby zgadzało się z tym w Conferences (lub usunąć z Conferences ten klucz obcy)
+
+WorkshopsBooking:
+- zarezerwowane miejsca nie mogą przekracza miejsc na warsztat (może trigger tutaj XD)
+- data bookingu ma być bo dacie bookingu na ConfenceDay
+- bookowanie musi być na warszataty, które są w dniu konferencji z ConferenceDayBooking
+
+ConferenceDayReservations:
+- nie wiem czy ilości osób się składają z bookingowymi, raczej nie
+
+WorkshopReservations:
+- ilościowo nie musi się składać z bookingami na warsztaty
+
+Payments:
+- ceny się nie składają
+- data płatności po dacie bookingu
