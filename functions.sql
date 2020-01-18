@@ -138,3 +138,21 @@ BEGIN
 	)
 	RETURN @IsCompany
 END
+
+
+GO
+CREATE FUNCTION IsStudent
+(
+	@ParticipantID int
+)
+RETURNS bit
+AS
+BEGIN
+	DECLARE @IsStudent bit
+	SET @IsStudent = (
+		SELECT Count(CardID)
+		FROM Students
+		WHERE ParticipantID = @ParticipantID
+	)
+	RETURN @IsStudent
+END

@@ -325,6 +325,23 @@ BEGIN
 	RETURN @IsCompany
 END
 
+GO
+CREATE FUNCTION IsStudent
+(
+	@ParticipantID int
+)
+RETURNS bit
+AS
+BEGIN
+	DECLARE @IsStudent bit
+	SET @IsStudent = (
+		SELECT Count(CardID)
+		FROM Students
+		WHERE ParticipantID = @ParticipantID
+	)
+	RETURN @IsStudent
+END
+
 
 /* Author: Grzegorz Poręba */
 GO
@@ -1091,6 +1108,28 @@ BEGIN
 END
 
 GO
+CREATE PROCEDURE AddCompany
+	@FirstName varchar(50),
+	@LastName varchar(50),
+	@Phone varchar(50),
+	@Email varchar(50),
+	@Address varchar(50),
+	@PostalCode varchar(50),
+	@City varchar(50),
+	@Country varchar(50),
+	@CompanyName varchar(50),
+	@NIP varchar(50)
+AS
+BEGIN
+	EXEC AddCustomer @FirstName, @LastName, @Email, @Address, @PostalCode, @City, @Country, @Phone
+	DECLARE @CustomerID int = (SELECT TOP 1 CustomerID
+								FROM Customers
+								WHERE FirstName = @FirstName AND LastName = @LastName)
+	EXEC AddCompanyData @CustomerID, @CompanyName, @NIP
+
+END
+
+GO
 CREATE PROCEDURE AddConference
 	@ConferenceName varchar(50),
 	@StartDate date,
@@ -1186,6 +1225,24 @@ BEGIN
 	SET NOCOUNT ON;
 		INSERT INTO Students(ParticipantID, CardID, ExpirationDate)
 			VALUES(@ParticipantID, @CardID, @ExpirationDate)
+END
+
+GO
+CREATE PROCEDURE AddStudent
+	@FirstName varchar(50),
+	@LastName varchar(50),
+	@BirthDate date,
+	@Email varchar(50),
+	@CardID int,
+	@ExpirationDate date
+AS
+BEGIN
+	EXEC AddParticipant @FirstName, @LastName, @BirthDate, @Email
+	DECLARE @ParticipantID int = (SELECT TOP 1 ParticipantID
+								FROM Participants
+								WHERE FirstName = @FirstName AND LastName = @LastName)
+	EXEC AddCompanyData @ParticipantID, @CardID, @ExpirationDate
+
 END
 
 GO
@@ -1309,7 +1366,7 @@ BEGIN
 END
 
 GO
-CREATE PROCEDURE AssignPartnerToConference -- Do sprawdzenia 
+CREATE PROCEDURE AssignPartnerToConference  
 	@PartnerID int,
 	@ConferenceID int
 AS
@@ -1539,7 +1596,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		BEGIN TRAN
-			DELETE FROM WorkshopReservations
+			DELETE FROM ConferenceDayReservations
 				WHERE ConferenceDayReservationID = @ConferenceDayReseverationID
 		COMMIT TRAN
 	END TRY
@@ -1671,7 +1728,7 @@ BEGIN
 END
 
 GO
-CREATE PROCEDURE GEN_BookPlacesForWorkshop -- Może wymaga przerobienia
+CREATE PROCEDURE GEN_BookPlacesForWorkshop
 	@WorkshopID int,
 	@PlacesReservedAmount int, 
 	@ConferenceDayBookingID int,
